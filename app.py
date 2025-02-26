@@ -154,7 +154,7 @@ import traceback
 @st.cache_resource
 def load_word2vec_model():
     try:
-        with open("./word2vec_model_custom.model", "rb") as f:
+        with open("word2vec_model_custom.pkl", "rb") as f:
             model = pickle.load(f)
         return model
     except Exception as e:
