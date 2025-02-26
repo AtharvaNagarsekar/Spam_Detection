@@ -153,13 +153,13 @@ stop_words = set(stopwords.words('english'))
 from gensim.models import Word2Vec
 import traceback
 @st.cache_resource
+@st.cache_resource
 def load_word2vec_model():
     try:
-        my_model = load_word2vec_model()
-        return my_model
+        return KeyedVectors.load("word2vec_model_custom.model")  # Ensure correct file path
     except Exception as e:
-        st.error(f"Error loading model: {str(e)}")
-        st.text(traceback.format_exc())
+        st.error(f"Error loading Word2Vec model: {e}")
+        return None
 
 # Load models with caching for performance
 @st.cache_resource
