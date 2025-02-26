@@ -6,22 +6,25 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
+from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 import lightgbm as lgb
-from gensim.models import Word2Vec
 
 nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('stopwords')
 
-# Set Streamlit page config
 st.set_page_config(
     page_title="📧 Spam Detection",
     layout="centered",
     page_icon="📩",
     initial_sidebar_state="collapsed"
 )
+
+st.markdown("<h1 style='text-align: center; color: white;'>📩 Spam Detector</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: #d4d4d4;'>Analyze if your message is spam or not.</p>", unsafe_allow_html=True)
+
 st.markdown(
     """
     <style>
@@ -137,42 +140,27 @@ st.markdown(
 
 # Decorative header
 
-# Title with vintage styling
-st.markdown("<h1 style='text-align: center;'>📩 Spam Detector</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; font-style: italic;'>A classic approach to modern problems</p>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>Detect if an email or message is spam with elegant precision.</p>", unsafe_allow_html=True)
-
 # Decorative divider
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-# Initialize NLP components
-
-# Load dataset
+# Initialize NLP components# Load dataset
 data = pd.read_csv('SMSSpamCollection.txt', sep='\t', names=['Prediction', 'Message'], on_bad_lines="skip")
 
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 
 # Preprocess messages
-corpus = []
-for i in range(len(data)):
-    msg = data['Message'][i].lower()
-    msg = re.sub('[^a-zA-Z]', ' ', msg)
-    msg = msg.split()
-    msg = [lemmatizer.lemmatize(word) for word in msg if word not in stop_words]
-    corpus.append(msg)
+def preprocess_text(text):
+    text = text.lower()
+    text = re.sub('[^a-zA-Z]', ' ', text)
+    words = word_tokenize(text)
+    words = [lemmatizer.lemmatize(word) for word in words if word not in stop_words]
+    return " ".join(words)
 
-data['Processed_Message'] = corpus
+data['Processed_Message'] = data['Message'].apply(preprocess_text)
 
-# Train Word2Vec model
-word2vec_model = Word2Vec(sentences=corpus, vector_size=100, window=5, min_count=1, workers=4)
-
-def avg_word2vec(doc):
-    vectors = [word2vec_model.wv[word] for word in doc if word in word2vec_model.wv.index_to_key]
-    return np.mean(vectors, axis=0) if vectors else np.zeros(word2vec_model.vector_size)
-
-# Feature extraction
-X = [avg_word2vec(msg) for msg in corpus]
-X = pd.DataFrame(X)
+# Convert text to numerical features using CountVectorizer
+vectorizer = CountVectorizer()
+X = vectorizer.fit_transform(data['Processed_Message']).toarray()
 
 # Encode target variable
 ohe = OneHotEncoder(drop='first', sparse_output=False)
@@ -182,29 +170,24 @@ y = pd.DataFrame(ohe.fit_transform(data[['Prediction']]), columns=['Prediction']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=16)
 
 # Standardization
-scaler = StandardScaler()
-X_train = pd.DataFrame(scaler.fit_transform(X_train), columns=X.columns)
-X_test = pd.DataFrame(scaler.transform(X_test), columns=X.columns)
+scaler = StandardScaler(with_mean=False)
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
 
 # Train LGBM model
 lgbm_model = lgb.LGBMClassifier()
 lgbm_model.fit(X_train, y_train.values.ravel())
 
-# Streamlit UI
 st.markdown('<h3 style="text-align: center;">✉️ Compose Your Message</h3>', unsafe_allow_html=True)
-st.write(" ")
-
 # User input
+# Text area for user input with fixed styling to ensure visibility
 user_input = st.text_area("", height=150, placeholder="Type your message here to analyze...", 
                           help="Enter the message you'd like to check for spam classification.")
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 def predict(msg):
-    msg = msg.lower()
-    msg = re.sub('[^a-zA-Z]', ' ', msg)
-    msg = word_tokenize(msg)
-    msg = [lemmatizer.lemmatize(word) for word in msg if word not in stop_words]
-    X_new = pd.DataFrame([avg_word2vec(msg)])
-    X_new_scaled = pd.DataFrame(scaler.transform(X_new), columns=X_new.columns)
+    msg = preprocess_text(msg)
+    X_new = vectorizer.transform([msg]).toarray()
+    X_new_scaled = scaler.transform(X_new)
     prediction = lgbm_model.predict(X_new_scaled)
     probability = lgbm_model.predict_proba(X_new_scaled)[0][1]
     return prediction[0], probability
@@ -212,11 +195,11 @@ def predict(msg):
 if st.button("Analyze Message"):
     if not user_input:
         st.warning("⚠️ Please enter a message to analyze!")
-    if user_input:
+    else:
         with st.spinner("Analyzing your message..."):
             prediction, probability = predict(user_input)
             st.markdown('<div class="spam-result">', unsafe_allow_html=True)
-            if prediction== 1:
+            if prediction == 1:
                 st.markdown(
                     f"""
                     <h2 style='text-align: center; color: #a83232;'>📛 SPAM DETECTED</h2>
@@ -244,6 +227,8 @@ if st.button("Analyze Message"):
                 )
             
             st.markdown('</div>', unsafe_allow_html=True)
+
+# Decorative divider
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 st.markdown('<div class="header-decoration">✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</div>', unsafe_allow_html=True)
 # Information expander with vintage styling
@@ -260,9 +245,3 @@ with st.expander("📜 About This Detector"):
         <p style='font-style: italic;'>The pursuit of separating genuine communication from unwanted solicitations is as old as correspondence itself.</p>
     </div>
     """, unsafe_allow_html=True)
-
-# Vintage footer
-st.markdown(
-    '<div class="footer">Crafted with care and consideration by Atharva, using the finest technologies available.</div>',
-    unsafe_allow_html=True
-)
