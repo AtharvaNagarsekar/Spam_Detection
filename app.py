@@ -135,6 +135,8 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Decorative header
 
@@ -152,8 +154,8 @@ import traceback
 @st.cache_resource
 def load_word2vec_model():
     try:
-        with open("word2vec_model_custom.model", "rb") as f:
-            model = gensim.models.Word2Vec.load("word2vec_model.model")
+        with open("./word2vec_model_custom.model", "rb") as f:
+            model = pickle.load(f)
         return model
     except Exception as e:
         print(f"Error loading model: {e}")
