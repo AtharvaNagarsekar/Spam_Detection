@@ -151,28 +151,20 @@ st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 import traceback
-@st.cache_resource
-def load_word2vec_model():
-    try:
-        with open("word2vec_model_custom.pkl", "rb") as f:
-            model = pickle.load(f)
-        return model
-    except Exception as e:
-        print(f"Error loading model: {e}")
-        return None
-
 # Load models with caching for performance
 @st.cache_resource
 def load_models():
     try:
+        with open("word2vec_model_custom.pkl", "rb") as f:
+            model = pickle.load(f)
         with open('scaler.pkl', 'rb') as f:
             loaded_scaler = pickle.load(f)
         with open('lgbm_final_model.pkl', 'rb') as f:
             final_model = pickle.load(f)
-        return loaded_scaler, final_model
+        return loaded_scaler, final_model , model
     except FileNotFoundError as e:
         st.error(f"⚠️ Model files not found! Error: {str(e)}")
-        return None, None
+        return None, None, None
 
 # Word2Vec Feature Extraction
 def avg_word2vec(doc, my_model):
@@ -199,8 +191,7 @@ def predict(msg, loaded_scaler, final_model, my_model):
     return prediction[0], probability
 
 # Load models
-my_model = load_word2vec_model()
-loaded_scaler, final_model = load_models()
+loaded_scaler, final_model, my_model = load_models()
 
 # Main UI Layout
 st.markdown('<h3 style="text-align: center;">✉️ Compose Your Message</h3>', unsafe_allow_html=True)
