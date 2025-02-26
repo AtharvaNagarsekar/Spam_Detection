@@ -5,6 +5,7 @@ import numpy as np
 import re
 import pandas as pd
 import nltk
+from gensim.models import KeyedVectors
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
@@ -149,7 +150,7 @@ st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 # Initialize NLP components
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
-
+from gensim.models import Word2Vec
 @st.cache_resource
 def load_word2vec_model():
     try:
