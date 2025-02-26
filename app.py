@@ -145,17 +145,12 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Decorative header
-
-# Decorative divider
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-# Initialize NLP components# Load dataset
 data = pd.read_csv('SMSSpamCollection.txt', sep='\t', names=['Prediction', 'Message'], on_bad_lines="skip")
 
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 
-# Preprocess messages
 def preprocess_text(text):
     text = text.lower()
     text = re.sub('[^a-zA-Z]', ' ', text)
@@ -164,30 +159,22 @@ def preprocess_text(text):
     return " ".join(words)
 
 data['Processed_Message'] = data['Message'].apply(preprocess_text)
-
-# Convert text to numerical features using CountVectorizer
 vectorizer = CountVectorizer()
 X = vectorizer.fit_transform(data['Processed_Message']).toarray()
-
-# Encode target variable
 ohe = OneHotEncoder(drop='first', sparse_output=False)
 y = pd.DataFrame(ohe.fit_transform(data[['Prediction']]), columns=['Prediction'])
 
-# Split dataset
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=16)
 
-# Standardization
 scaler = StandardScaler(with_mean=False)
 X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
-# Train LGBM model
 lgbm_model = lgb.LGBMClassifier()
 lgbm_model.fit(X_train, y_train.values.ravel())
 
 st.markdown('<h3 style="text-align: center;">✉️ Compose Your Message</h3>', unsafe_allow_html=True)
-# User input
-# Text area for user input with fixed styling to ensure visibility
+
 user_input = st.text_area("", height=150, placeholder="Type your message here to analyze...", 
                           help="Enter the message you'd like to check for spam classification.")
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
@@ -235,16 +222,14 @@ if st.button("Analyze Message"):
             
             st.markdown('</div>', unsafe_allow_html=True)
 
-# Decorative divider
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 st.markdown('<div class="header-decoration">✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦ ✦</div>', unsafe_allow_html=True)
-# Information expander with vintage styling
 with st.expander("📜 About This Detector"):
     st.markdown("""
     <div style='font-family: "Libre Baskerville", serif;'>
         <p>This spam detector combines time-honored wisdom with modern techniques:</p>
         <ul>
-            <li><strong>Word Embeddings:</strong> Messages are transformed into numerical representations using Word2Vec technology.</li>
+            <li><strong>Word Embeddings:</strong> Messages are transformed into numerical representations.</li>
             <li><strong>Advanced Classification:</strong> A LightGBM classifier examines these representations to determine authenticity.</li>
             <li><strong>Natural Language Processing:</strong> Before analysis, messages undergo proper linguistic preparation.</li>
             <li><strong>Custom Training:</strong> The system has been educated on a collection of both proper and improper correspondences.</li>
@@ -252,3 +237,7 @@ with st.expander("📜 About This Detector"):
         <p style='font-style: italic;'>The pursuit of separating genuine communication from unwanted solicitations is as old as correspondence itself.</p>
     </div>
     """, unsafe_allow_html=True)
+st.markdown(
+    '<div class="footer">Crafted with care and consideration by Atharva, using the finest technologies available.</div>',
+    unsafe_allow_html=True
+)
