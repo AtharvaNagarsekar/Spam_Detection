@@ -1,5 +1,4 @@
 import streamlit as st
-import gensim
 import pickle
 import numpy as np
 import re
@@ -146,19 +145,18 @@ st.markdown("<p style='text-align: center;'>Detect if an email or message is spa
 
 # Decorative divider
 st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
-
 # Initialize NLP components
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
-from gensim.models import Word2Vec
 import traceback
-@st.cache_resource
 @st.cache_resource
 def load_word2vec_model():
     try:
-        return KeyedVectors.load("word2vec_model_custom.model")  # Ensure correct file path
+        with open("word2vec_model_custom.model", "rb") as f:
+            model = pickle.load(f)
+        return model
     except Exception as e:
-        st.error(f"Error loading Word2Vec model: {e}")
+        print(f"Error loading model: {e}")
         return None
 
 # Load models with caching for performance
