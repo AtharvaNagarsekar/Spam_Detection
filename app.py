@@ -3,6 +3,7 @@ import pickle
 import numpy as np
 import re
 import pandas as pd
+import sklearn
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
