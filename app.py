@@ -4,7 +4,6 @@ import numpy as np
 import re
 import pandas as pd
 import nltk
-from gensim.models import KeyedVectors
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
