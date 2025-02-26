@@ -11,6 +11,12 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
 import lightgbm as lgb
 
+import nltk
+try:
+    nltk.data.find('tokenizers/punkt')
+except LookupError:
+    nltk.download('punkt')
+
 nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('stopwords')
