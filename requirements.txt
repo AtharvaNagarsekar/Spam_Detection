@@ -4,4 +4,3 @@ nltk
 streamlit
 scikit-learn
 lightgbm
-gensim

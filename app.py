@@ -149,11 +149,11 @@ st.markdown('<div class="divider"></div>', unsafe_allow_html=True)
 lemmatizer = WordNetLemmatizer()
 stop_words = set(stopwords.words('english'))
 import traceback
-import gensim
 @st.cache_resource
 def load_word2vec_model():
     try:
-        model = gensim.models.Word2Vec.load("word2vec_model.model")
+        with open("word2vec_model_custom.model", "rb") as f:
+            model = gensim.models.Word2Vec.load("word2vec_model.model")
         return model
     except Exception as e:
         print(f"Error loading model: {e}")
