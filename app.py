@@ -221,11 +221,11 @@ if classify_btn:
         st.warning("⚠️ Please enter a message to analyze!")
     elif my_model is None or loaded_scaler is None or final_model is None:
         if my_model is None:
-            st.write(my_model)
+            st.write("my_model")
         if loaded_scaler is None:
-            st.write(loaded_scaler)
+            st.write("loaded_scaler")
         if final_model is None:
-            st.write(final_model)
+            st.write("final_model")
     else:
         with st.spinner("Analyzing your message..."):
             prediction_value, probability = predict(user_input, loaded_scaler, final_model, my_model)
