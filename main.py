@@ -418,9 +418,8 @@ with st.expander("📚 Explore the Literary Archives"):
     with col2:
         st.metric("Negative Reviews", f"{(len(df) - df['rating'].sum()):,}")
         st.metric("Positive Ratio", f"{df['rating'].mean()*100:.1f}%")
-st.markdown("""
-<div style="text-align: center; margin-top: 50px; font-family: 'Lora', serif; font-style: italic; font-size: 16px; color: #8A6552;">
-    "In the pages of a book, we find a different world. In the pages of a review, we find our reflection."
-</div>
-""", unsafe_allow_html=True)
+st.markdown(
+    '<div class="footer">Crafted with care and consideration by Atharva, using the finest technologies available.</div>',
+    unsafe_allow_html=True
+)
 st.markdown('</div>', unsafe_allow_html=True)
